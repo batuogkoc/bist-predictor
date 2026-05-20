@@ -76,12 +76,14 @@ class ParquetPriceSequenceDataset(Dataset):
         price_matrix: pd.DataFrame,
         seq_len: int,
         selected_ticker: Optional[Union[int, str]] = None,
+        normalize: bool = True,
     ):
         if selected_ticker is not None:
             price_matrix = self._select_ticker(price_matrix, selected_ticker)
 
         self.ticker_names = list(price_matrix.columns)
         self.seq_len = seq_len
+        self.normalize = normalize
         self.inputs, self.targets, self.ticker_ids = self._build_dataset(
             price_matrix, seq_len
         )
@@ -140,6 +142,9 @@ class ParquetPriceSequenceDataset(Dataset):
 
     def __getitem__(self, index: int):
         x = torch.from_numpy(self.inputs[index]).float()
+        if self.normalize:
+            std = x.std()
+            x = (x - x.mean()) / (std + 1e-8)
         y = torch.tensor(self.targets[index], dtype=torch.long)
         ticker_id = int(self.ticker_ids[index])
         return x, y, ticker_id
@@ -166,6 +171,7 @@ def build_dataset_from_parquet(
     seq_len: int,
     price_level: str = "Close",
     ticker_selection: Optional[Union[int, str, Sequence[str]]] = None,
+    normalize: bool = True,
 ) -> ParquetPriceSequenceDataset:
     df = load_price_matrix(parquet_path, price_level=price_level)
 
@@ -176,6 +182,7 @@ def build_dataset_from_parquet(
         df,
         seq_len=seq_len,
         selected_ticker=ticker_selection if isinstance(ticker_selection, (int, str)) else None,
+        normalize=normalize,
     )
 
 

@@ -1,4 +1,7 @@
 torch>=1.13
+torchvision
 pandas
 pyarrow
 numpy
+matplotlib
+hydra-core>=1.3
