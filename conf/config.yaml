@@ -1,5 +1,5 @@
 defaults:
-  - model: mlp
+  - model: transformer
 
 dataset: parquet
 parquet: data/bist/raw/prices_raw.parquet
@@ -9,7 +9,7 @@ batch_size: 32
 epochs: 10
 lr: 0.01
 fraction: 1.0
-ticker_index: null
+ticker_index: 0
 ticker: null
 normalize: true
 device: auto
